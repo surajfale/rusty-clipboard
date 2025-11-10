@@ -1,0 +1,54 @@
+# Default configuration for Rusty Clipboard.
+# Copy this file to %APPDATA%\clipmgr\config.toml and adjust as needed.
+
+[general]
+# Width of the right-side panel as a fraction of the terminal columns.
+panel_width = 0.30
+# Hotkey used to toggle clipctl (mirrors Windows Terminal binding).
+hotkey = "F12"
+# How pastes are performed: "send_input", "stdout", or "osc52".
+paste_behavior = "send_input"
+# Maximum number of entries retained in the database.
+max_entries = 10000
+# Delete entries older than this many days (0 disables time-based pruning).
+max_days = 30
+
+[capture]
+# Ignore clipboard updates that match any of these window title regexes.
+ignore_window_titles = [
+  ".*KeePass.*",
+  ".*1Password.*"
+]
+# Ignore clipboard formats outside this allowlist.
+allowed_kinds = ["text", "url", "rtf"]
+
+[privacy]
+# When true, clipd starts in privacy mode and will not persist entries until toggled.
+start_in_privacy_mode = false
+# Securely wipe entries (shred) when deleting from history.
+secure_wipe = false
+
+[transformers]
+# Transformers run before persistence and before paste, in order.
+pre_paste = [
+  "trim_whitespace",
+  "normalize_line_endings"
+]
+post_capture = [
+  "detect_language"
+]
+
+[ui]
+# Show entry timestamps in the history list.
+show_timestamps = true
+# Highlight search matches inside the preview pane.
+highlight_matches = true
+# Expand preview pane to 40% when focused via `l`.
+preview_expanded_width = 0.40
+
+[logging]
+# Valid levels: "error", "warn", "info", "debug", "trace".
+level = "info"
+# Optional file path to receive structured JSON logs.
+file = ""
+
