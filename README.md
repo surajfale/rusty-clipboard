@@ -1,5 +1,9 @@
 # rusty-clipboard
 
+[![CI](https://github.com/surajfale/rusty-clipboard/actions/workflows/ci.yml/badge.svg)](https://github.com/surajfale/rusty-clipboard/actions/workflows/ci.yml)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/surajfale/rusty-clipboard/blob/main/LICENSE-MIT)
+[![Rust](https://img.shields.io/badge/rust-1.76%2B-orange.svg)](https://www.rust-lang.org/)
+
 Rusty Clipboard is a terminal-first clipboard manager for Windows 11. It pairs a background clipboard capture daemon (`clipd`) with a right-hand terminal UI (`clipctl`) that lets you search, filter, and paste items using Vim-inspired keybindings.
 
 ## Crates
@@ -45,7 +49,7 @@ If you've cloned this repository from GitHub, you can build the project manually
 
 1. Clone the repository:
 ```powershell
-git clone https://github.com/yourusername/rusty-clipboard.git
+git clone https://github.com/surajfale/rusty-clipboard.git
 cd rusty-clipboard
 ```
 

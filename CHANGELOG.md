@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### 2025-11-11 13:41:38 - a9b9caa [LOCAL]
+### 2025-11-11 13:47:38 - 78cec38 [LOCAL]
+
+feat(docs): add license files and update README with badges
+
+- Added Apache and MIT license files
+- Updated README with CI and license badges
+- Corrected GitHub clone URL in README### 2025-11-11 13:41:38 - a9b9caa [PUSHED]
 
 feat(docs): add build instructions and CI workflows
 
