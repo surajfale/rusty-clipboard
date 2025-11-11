@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### 2025-11-11 10:33:10 - 5a1ae95 [LOCAL]
+### 2025-11-11 13:41:38 - a9b9caa [LOCAL]
+
+feat(docs): add build instructions and CI workflows
+
+- Introduced CI workflow for continuous integration.
+- Added release workflow for automated deployments.
+- Expanded README with detailed build instructions.### 2025-11-11 10:33:10 - 5a1ae95 [PUSHED]
 
 feat(ui): enhance clipctl with syntax highlighting and themes
 

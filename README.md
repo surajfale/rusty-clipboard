@@ -33,6 +33,48 @@ The script will:
 Restart your PowerShell session after the installer finishes so the profile
 changes take effect. Then press F12 to launch the clipboard manager UI.
 
+### Building from Source
+
+If you've cloned this repository from GitHub, you can build the project manually:
+
+**Prerequisites:**
+- Windows 11 22H2 or later
+- Rust toolchain (install with: `winget install --id Rustlang.Rust.MSVC`)
+
+**Build Steps:**
+
+1. Clone the repository:
+```powershell
+git clone https://github.com/yourusername/rusty-clipboard.git
+cd rusty-clipboard
+```
+
+2. Build the release binaries:
+```powershell
+cargo build --release --bin clipd --bin clipctl
+```
+
+3. The binaries will be in `target/release/`:
+   - `target/release/clipd.exe` - Background daemon
+   - `target/release/clipctl.exe` - Terminal UI client
+
+4. (Optional) Run the installer to set up your environment:
+```powershell
+.\install.ps1 --SkipBuild
+```
+
+Or manually copy the binaries to your desired location and add them to your PATH.
+
+**For Development:**
+```powershell
+# Run in debug mode
+cargo run --bin clipd
+cargo run --bin clipctl
+
+# Or use the dev script
+.\dev.ps1
+```
+
 ## Usage
 
 After installation:
