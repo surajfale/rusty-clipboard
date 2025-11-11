@@ -60,6 +60,11 @@ User copies text/image ─┐
 - `ratatui` + `crossterm` render a three-pane layout: history list, preview pane, command bar.
 - `clipctl` polls for input via `spawn_blocking` around `crossterm::event::read`, keeping the async runtime responsive.
 - Modal UI mirrors Vim semantics for predictable keyboard-driven workflows.
+- **Theme system:** Multiple color themes (Nord default, Dracula, Tokyo Night, Gruvbox) with comprehensive styling for borders, text, icons, tags, and metadata.
+- **Syntax highlighting:** Uses `syntect` library for automatic code language detection and highlighting. Supports Rust, Python, JavaScript, Go, C++, Java, SQL, Bash, PHP, and more.
+- **Rich text rendering:** Markdown-style formatting with colored headers, bullet points, inline code blocks, and bold text.
+- **Help overlay:** Full-screen help mode accessible with `?` key, displaying all keybindings in a styled overlay.
+- **Enhanced preview:** Shows entry type, source process, tags, timestamp, and content with syntax highlighting or formatted text rendering.
 
 ## Search & Filtering
 

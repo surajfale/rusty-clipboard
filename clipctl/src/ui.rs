@@ -5,11 +5,14 @@ use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
 use ratatui::backend::CrosstermBackend;
 use ratatui::layout::{Alignment, Constraint, Direction, Layout};
 use ratatui::style::{Color, Modifier, Style};
+use ratatui::text::{Line, Span, Text};
 use ratatui::widgets::{Block, Borders, List, ListItem, ListState, Paragraph};
 use ratatui::Terminal;
 
 use crate::ipc::{EntrySummary, Request, RequestKind, Response};
 use crate::paste::{PasteEngine, PasteMethod};
+use crate::syntax::{detect_code_language, highlight_code, render_formatted_text};
+use crate::theme::Theme;
 
 #[derive(Debug)]
 pub enum UiEvent {
@@ -30,6 +33,7 @@ pub struct TerminalUi {
     list_state: ListState,
     mode: UiMode,
     input_buffer: String,
+    theme: Theme,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -62,6 +66,7 @@ impl TerminalUi {
             list_state,
             mode: UiMode::Normal,
             input_buffer: String::new(),
+            theme: Theme::nord(), // Default to Nord theme, can be made configurable
         })
     }
 
@@ -85,35 +90,93 @@ impl TerminalUi {
             
             // If in help mode, show help screen
             if is_help_mode {
-                let help_text = vec![
-                    "rusty-clipboard - Keybindings",
-                    "",
-                    "Navigation:",
-                    "  j/↓         Move down",
-                    "  k/↑         Move up",
-                    "  g           Go to top",
-                    "  G           Go to bottom",
-                    "",
-                    "Actions:",
-                    "  Enter/l     Paste selected entry",
-                    "  /           Start search",
-                    "  t           Add tag to entry",
-                    "  T           Remove tag from entry",
-                    "  e           Export history to JSON",
-                    "  i           Import history from JSON",
-                    "",
-                    "General:",
-                    "  ?           Show this help",
-                    "  q/Esc       Quit",
-                    "",
-                    "Press any key to close help...",
+                let theme = &self.theme;
+                
+                let help_lines = vec![
+                    Line::from(vec![
+                        Span::styled(
+                            "rusty-clipboard",
+                            Style::default()
+                                .fg(theme.border_focused)
+                                .add_modifier(Modifier::BOLD | Modifier::UNDERLINED),
+                        ),
+                        Span::raw(" - Keybindings"),
+                    ]),
+                    Line::raw(""),
+                    Line::styled("Navigation:", theme.style_help_section()),
+                    Line::from(vec![
+                        Span::styled("  j", theme.style_help_key()),
+                        Span::raw("/"),
+                        Span::styled("↓", theme.style_help_key()),
+                        Span::styled("         Move down", theme.style_help_desc()),
+                    ]),
+                    Line::from(vec![
+                        Span::styled("  k", theme.style_help_key()),
+                        Span::raw("/"),
+                        Span::styled("↑", theme.style_help_key()),
+                        Span::styled("         Move up", theme.style_help_desc()),
+                    ]),
+                    Line::from(vec![
+                        Span::styled("  g", theme.style_help_key()),
+                        Span::styled("           Go to top", theme.style_help_desc()),
+                    ]),
+                    Line::from(vec![
+                        Span::styled("  G", theme.style_help_key()),
+                        Span::styled("           Go to bottom", theme.style_help_desc()),
+                    ]),
+                    Line::raw(""),
+                    Line::styled("Actions:", theme.style_help_section()),
+                    Line::from(vec![
+                        Span::styled("  Enter", theme.style_help_key()),
+                        Span::raw("/"),
+                        Span::styled("l", theme.style_help_key()),
+                        Span::styled("     Paste selected entry", theme.style_help_desc()),
+                    ]),
+                    Line::from(vec![
+                        Span::styled("  /", theme.style_help_key()),
+                        Span::styled("           Start search", theme.style_help_desc()),
+                    ]),
+                    Line::from(vec![
+                        Span::styled("  t", theme.style_help_key()),
+                        Span::styled("           Add tag to entry", theme.style_help_desc()),
+                    ]),
+                    Line::from(vec![
+                        Span::styled("  T", theme.style_help_key()),
+                        Span::styled("           Remove tag from entry", theme.style_help_desc()),
+                    ]),
+                    Line::from(vec![
+                        Span::styled("  e", theme.style_help_key()),
+                        Span::styled("           Export history to JSON", theme.style_help_desc()),
+                    ]),
+                    Line::from(vec![
+                        Span::styled("  i", theme.style_help_key()),
+                        Span::styled("           Import history from JSON", theme.style_help_desc()),
+                    ]),
+                    Line::raw(""),
+                    Line::styled("General:", theme.style_help_section()),
+                    Line::from(vec![
+                        Span::styled("  ?", theme.style_help_key()),
+                        Span::styled("           Show this help", theme.style_help_desc()),
+                    ]),
+                    Line::from(vec![
+                        Span::styled("  q", theme.style_help_key()),
+                        Span::raw("/"),
+                        Span::styled("Esc", theme.style_help_key()),
+                        Span::styled("       Quit", theme.style_help_desc()),
+                    ]),
+                    Line::raw(""),
+                    Line::styled(
+                        "Press any key to close help...",
+                        Style::default().fg(theme.metadata_label).add_modifier(Modifier::ITALIC),
+                    ),
                 ];
                 
-                let help = Paragraph::new(help_text.join("\n"))
+                let help = Paragraph::new(help_lines)
                     .block(
                         Block::default()
-                            .title("Help")
+                            .title(Span::styled(" Help ", theme.style_title()))
                             .borders(Borders::ALL)
+                            .border_style(theme.style_border_focused())
                             .title_alignment(Alignment::Center),
                     )
                     .alignment(Alignment::Left)
@@ -133,75 +196,202 @@ impl TerminalUi {
                 .split(layout[0]);
 
             // Format history items with kind and tags
+            let theme = &self.theme;
             let history_items: Vec<_> = entries
                 .iter()
                 .map(|entry| {
-                    let kind_icon = match entry.kind.as_str() {
-                        "text" => "📝",
-                        "url" => "🔗",
-                        "image" => "🖼️",
-                        "rtf" => "📄",
-                        _ => "❓",
+                    let (kind_icon, icon_color) = match entry.kind.as_str() {
+                        "text" => ("📝", theme.text_icon),
+                        "url" => ("🔗", theme.url_icon),
+                        "image" => ("🖼️", theme.image_icon),
+                        "rtf" => ("📄", theme.rtf_icon),
+                        _ => ("❓", theme.metadata_label),
                     };
-                    let tags_str = if entry.tags.is_empty() {
-                        String::new()
+                    
+                    let mut spans = vec![
+                        Span::styled(
+                            format!("{} ", kind_icon),
+                            Style::default().fg(icon_color),
+                        ),
+                    ];
+                    
+                    // Truncate preview if too long
+                    let preview_text = if entry.preview.len() > 80 {
+                        format!("{}...", &entry.preview[..77])
                     } else {
-                        format!(" [{}]", entry.tags.join(", "))
+                        entry.preview.clone()
                     };
-                    ListItem::new(format!("{} {}{}", kind_icon, entry.preview, tags_str))
+                    
+                    spans.push(Span::styled(
+                        preview_text,
+                        theme.style_list_item(),
+                    ));
+                    
+                    // Add tags with styling
+                    if !entry.tags.is_empty() {
+                        spans.push(Span::raw("  "));
+                        for (i, tag) in entry.tags.iter().enumerate() {
+                            if i > 0 {
+                                spans.push(Span::raw(" "));
+                            }
+                            spans.push(Span::styled(
+                                format!(" {} ", tag),
+                                theme.style_tag(),
+                            ));
+                        }
+                    }
+                    
+                    ListItem::new(Line::from(spans))
                 })
                 .collect();
 
             let list = List::new(history_items)
                 .block(
                     Block::default()
-                        .title("History (? for help)")
+                        .title(Span::styled(" History (? for help) ", theme.style_title()))
                         .borders(Borders::ALL)
+                        .border_style(theme.style_border())
                         .title_alignment(Alignment::Center),
                 )
-                .highlight_style(
-                    Style::default()
-                        .fg(Color::Yellow)
-                        .add_modifier(Modifier::BOLD),
-                )
-                .highlight_symbol("> ");
+                .highlight_style(theme.style_list_selected())
+                .highlight_symbol("▶ ");
 
-            // Enhanced preview with metadata
-            let preview_text = entries
+            // Enhanced preview with metadata and syntax highlighting
+            let preview_content = entries
                 .get(selected)
                 .map(|e| {
-                    let mut text = String::new();
-                    text.push_str(&format!("Type: {}\n", e.kind));
+                    let theme = &self.theme;
+                    let mut lines = Vec::new();
+                    
+                    // Metadata header
+                    lines.push(Line::from(vec![
+                        Span::styled("Type: ", theme.style_metadata_label()),
+                        Span::styled(&e.kind, theme.style_metadata_value()),
+                    ]));
+                    
                     if let Some(ref proc) = e.source_process {
-                        text.push_str(&format!("Source: {}\n", proc));
+                        lines.push(Line::from(vec![
+                            Span::styled("Source: ", theme.style_metadata_label()),
+                            Span::styled(proc, theme.style_metadata_value()),
+                        ]));
                     }
+                    
                     if !e.tags.is_empty() {
-                        text.push_str(&format!("Tags: {}\n", e.tags.join(", ")));
+                        let mut tag_spans = vec![
+                            Span::styled("Tags: ", theme.style_metadata_label()),
+                        ];
+                        for (i, tag) in e.tags.iter().enumerate() {
+                            if i > 0 {
+                                tag_spans.push(Span::raw(", "));
+                            }
+                            tag_spans.push(Span::styled(tag, theme.style_tag()));
+                        }
+                        lines.push(Line::from(tag_spans));
                     }
-                    text.push_str(&format!("Time: {}\n\n", e.created_at));
-                    text.push_str(&e.preview);
-                    text
+                    
+                    lines.push(Line::from(vec![
+                        Span::styled("Time: ", theme.style_metadata_label()),
+                        Span::styled(&e.created_at, theme.style_metadata_value()),
+                    ]));
+                    
+                    lines.push(Line::from(Span::styled(
+                        "─".repeat(40),
+                        Style::default().fg(theme.border),
+                    )));
+                    
+                    // Content with syntax highlighting or formatting
+                    if let Some(lang) = detect_code_language(&e.preview) {
+                        // Syntax highlight detected code
+                        let highlighted = highlight_code(&e.preview, Some(lang));
+                        lines.extend(highlighted.lines);
+                    } else if e.preview.contains("# ") || e.preview.contains("## ") {
+                        // Render as formatted markdown-like text
+                        let formatted = render_formatted_text(&e.preview);
+                        lines.extend(formatted.lines);
+                    } else {
+                        // Regular text with basic styling
+                        for line in e.preview.lines().take(50) {
+                            lines.push(Line::from(Span::styled(
+                                line.to_string(),
+                                theme.style_list_item(),
+                            )));
+                        }
+                    }
+                    
+                    Text::from(lines)
                 })
-                .unwrap_or_else(|| "<no selection>".to_string());
+                .unwrap_or_else(|| {
+                    Text::from(Line::from(Span::styled(
+                        "<no selection>",
+                        Style::default().fg(Color::Gray).add_modifier(Modifier::ITALIC),
+                    )))
+                });
 
-            let preview = Paragraph::new(preview_text)
-                .block(Block::default().title("Preview").borders(Borders::ALL))
+            let preview = Paragraph::new(preview_content)
+                .block(
+                    Block::default()
+                        .title(Span::styled(" Preview ", theme.style_title()))
+                        .borders(Borders::ALL)
+                        .border_style(theme.style_border()),
+                )
                 .alignment(Alignment::Left)
-                .wrap(ratatui::widgets::Wrap { trim: true });
+                .wrap(ratatui::widgets::Wrap { trim: true })
+                .scroll((0, 0));
 
-            // Mode-aware command bar
-            let (command_prompt, command_text) = match mode {
-                UiMode::Normal => ("Search: /", filter.as_str()),
-                UiMode::Search => ("Search: /", input_buffer.as_str()),
-                UiMode::AddTag => ("Add tag: ", input_buffer.as_str()),
-                UiMode::RemoveTag => ("Remove tag: ", input_buffer.as_str()),
-                UiMode::Export => ("Export to: ", input_buffer.as_str()),
-                UiMode::Import => ("Import from: ", input_buffer.as_str()),
-                UiMode::Help => ("", ""),
+            // Mode-aware command bar with rich styling
+            let command_content = match mode {
+                UiMode::Normal => {
+                    let mut spans = vec![
+                        Span::styled("Search: ", theme.style_command_prompt()),
+                        Span::styled(filter.as_str(), theme.style_command_input()),
+                    ];
+                    if filter.is_empty() {
+                        spans.push(Span::styled(
+                            " (press / to search)",
+                            Style::default().fg(theme.metadata_label).add_modifier(Modifier::ITALIC),
+                        ));
+                    }
+                    Line::from(spans)
+                }
+                UiMode::Search => Line::from(vec![
+                    Span::styled("🔍 Search: ", theme.style_command_prompt()),
+                    Span::styled(input_buffer.as_str(), theme.style_command_input()),
+                    Span::styled("█", Style::default().fg(theme.list_selected_fg)), // Cursor
+                ]),
+                UiMode::AddTag => Line::from(vec![
+                    Span::styled("🏷️  Add tag: ", theme.style_command_prompt()),
+                    Span::styled(input_buffer.as_str(), theme.style_command_input()),
+                    Span::styled("█", Style::default().fg(theme.list_selected_fg)),
+                ]),
+                UiMode::RemoveTag => Line::from(vec![
+                    Span::styled("🗑️  Remove tag: ", theme.style_command_prompt()),
+                    Span::styled(input_buffer.as_str(), theme.style_command_input()),
+                    Span::styled("█", Style::default().fg(theme.list_selected_fg)),
+                ]),
+                UiMode::Export => Line::from(vec![
+                    Span::styled("💾 Export to: ", theme.style_command_prompt()),
+                    Span::styled(input_buffer.as_str(), theme.style_command_input()),
+                    Span::styled("█", Style::default().fg(theme.list_selected_fg)),
+                ]),
+                UiMode::Import => Line::from(vec![
+                    Span::styled("📥 Import from: ", theme.style_command_prompt()),
+                    Span::styled(input_buffer.as_str(), theme.style_command_input()),
+                    Span::styled("█", Style::default().fg(theme.list_selected_fg)),
+                ]),
+                UiMode::Help => Line::from(""),
             };
 
-            let command_bar = Paragraph::new(format!("{}{}", command_prompt, command_text))
-                .block(Block::default().borders(Borders::ALL).title("Command"))
+            let command_bar = Paragraph::new(command_content)
+                .block(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .border_style(if *mode != UiMode::Normal {
+                            theme.style_border_focused()
+                        } else {
+                            theme.style_border()
+                        })
+                        .title(Span::styled(" Command ", theme.style_title())),
+                )
                 .alignment(Alignment::Left);
 
             frame.render_stateful_widget(list, main[0], list_state);

@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### 2025-11-10 11:52:47 - a15c073 [PUSHED]
+### 2025-11-11 10:33:10 - 5a1ae95 [LOCAL]
+
+feat(ui): enhance clipctl with syntax highlighting and themes
+
+- Added syntax highlighting for multiple languages
+- Introduced multiple color themes for improved UI
+- Updated documentation to reflect new features
+- Enhanced help screen with keybindings and visual feedback
+- Improved metadata display in the preview pane### 2025-11-10 11:52:47 - a15c073 [PUSHED]
 
 chore: remove obsolete Rust project files and configurations
 

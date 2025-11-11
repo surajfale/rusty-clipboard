@@ -120,6 +120,7 @@ Exiting:
 
 - `Enter`/`l` pastes selection and closes the UI
 - `q` or `Esc` quits without pasting
+- `?` opens the help screen showing all keybindings (press any key to close)
 
 ### Manual Windows Terminal Hotkey (Optional)
 
@@ -145,6 +146,31 @@ Note: The installer already sets up F12 via PowerShell profile, so this is only 
 - Open `clipctl` (`F12`), navigate with `j/k` or arrow keys, preview details in the right pane.
 - Press `Enter` or `l` to paste into the focused window.
 - Tags help organize snippets: press `t` to add, `T` to remove.
+- Press `?` to view the help screen with all available keybindings.
+
+## Visual Features
+
+The TUI includes several visual enhancements to improve usability:
+
+- **Color Themes**: Beautiful color schemes including Nord (default), Dracula, Tokyo Night, and Gruvbox themes with carefully chosen colors for borders, text, and UI elements.
+- **Syntax Highlighting**: Automatically detects and highlights code snippets for Rust, Python, JavaScript, Go, C++, Java, SQL, Bash, PHP, and more. Code is highlighted using syntect with a dark theme optimized for terminal viewing.
+- **Rich Text Rendering**: Markdown-style formatting support with colored headers (`#`, `##`), bullet points, inline code blocks, and bold text.
+- **Colored Icons**: Different colored icons for entry types:
+  - 📝 Text (cyan)
+  - 🔗 URLs (blue)
+  - 🖼️ Images (purple)
+  - 📄 RTF/Documents (yellow)
+- **Enhanced Preview**: The right pane shows:
+  - Entry type and source process
+  - Tags with styled backgrounds
+  - Timestamp of capture
+  - Syntax-highlighted code or formatted text preview
+- **Mode-Aware Command Bar**: The bottom command bar shows different prompts with emojis depending on the current mode:
+  - 🔍 Search mode
+  - 🏷️ Add tag mode
+  - 🗑️ Remove tag mode
+  - 💾 Export mode
+  - 📥 Import mode
 
 ## Search & Filtering
 
@@ -175,9 +201,10 @@ Imports deduplicate entries using SHA-256 hashes and log skipped counts.
 
 ## Tags & Metadata
 
-- Tags display inline as `[tag1, tag2]`.
+- Tags display inline with styled backgrounds in the history list.
 - Preview pane shows type icon, source process (e.g., `chrome.exe`), captured timestamp, and content snippet.
 - Source tracking uses `GetForegroundWindow` to capture the originating process name.
+- Metadata is displayed with styled labels and values for easy scanning.
 
 ## Troubleshooting
 

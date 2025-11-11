@@ -33,6 +33,10 @@ This document captures the reasoning behind key architectural and UX decisions, 
 - **Modal input system:** Modes (`Normal`, `Search`, `AddTag`, `RemoveTag`, `Export`, `Import`, `Help`) make complex workflows feel familiar to Vim users.
 - **Rich metadata view:** Icons for entry type (📝, 🔗, 🖼️, 📄), tags inline, source process, timestamps, and content preview provide context without leaving the terminal.
 - **Borrow checker friendly rendering:** Data is extracted before drawing to avoid mutable aliasing inside `ratatui` rendering closures.
+- **Theme system:** Multiple color themes (Nord, Dracula, Tokyo Night, Gruvbox) with comprehensive styling for all UI elements including borders, text, icons, tags, and metadata.
+- **Syntax highlighting:** Automatic code language detection with syntax highlighting using syntect library, supporting Rust, Python, JavaScript, Go, C++, Java, SQL, Bash, PHP, and more.
+- **Rich text rendering:** Markdown-style formatting support with colored headers, bullet points, inline code, and bold text for better content readability.
+- **Help overlay:** Full-screen help screen accessible with `?` key showing all keybindings organized by category (Navigation, Actions, General).
 
 ## Testing & Quality
 
@@ -61,9 +65,15 @@ This document captures the reasoning behind key architectural and UX decisions, 
 
 ## UX Enhancements in Place
 
-- **Discoverability:** `?` toggles an inline help overlay listing every keybinding.
-- **Real-time feedback:** Search updates as the user types; command bar mirrors current mode and input buffer.
+- **Discoverability:** `?` toggles a full-screen help overlay listing every keybinding organized by category (Navigation, Actions, General).
+- **Real-time feedback:** Search updates as the user types; command bar mirrors current mode and input buffer with emoji indicators.
 - **Safe interactions:** `Esc` cancels any mode, avoiding destructive actions.
+- **Visual polish:** 
+  - Multiple color themes with carefully chosen palettes for readability and aesthetics
+  - Syntax highlighting for code snippets improves content scanning
+  - Colored icons and styled tags provide quick visual categorization
+  - Enhanced preview pane with metadata labels and values
+  - Mode-aware command bar with emojis provides clear visual feedback
 - **Batch operations (planned):** Future work includes entry pinning, multi-select, and quick filters without breaking current flows.
 
 ## Deployment Notes

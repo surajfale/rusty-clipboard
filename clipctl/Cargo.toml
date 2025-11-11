@@ -21,3 +21,8 @@ once_cell = "1"
 nu-ansi-term = "0.50"
 clipboard-win = "5.4"
 
+# Syntax highlighting and rich text
+syntect = "5.2"
+ansi-to-tui = "7.0"
+pulldown-cmark = "0.12"
+

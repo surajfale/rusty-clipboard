@@ -3,6 +3,8 @@
 mod app;
 mod ipc;
 mod paste;
+mod syntax;
+mod theme;
 mod ui;
 
 use anyhow::Result;

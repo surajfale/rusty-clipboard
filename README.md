@@ -5,7 +5,7 @@ Rusty Clipboard is a terminal-first clipboard manager for Windows 11. It pairs a
 ## Crates
 
 - `clipd`: background service that listens for clipboard updates, normalizes content, stores history in SQLite, and serves requests via a named pipe.
-- `clipctl`: terminal UI client built with ratatui that displays clipboard history, supports incremental search, and triggers paste actions back into the active terminal.
+- `clipctl`: terminal UI client built with ratatui that displays clipboard history, supports incremental search, syntax highlighting, multiple color themes, and triggers paste actions back into the active terminal.
 
 ## Installation
 
@@ -40,6 +40,14 @@ After installation:
 - Press **F12** to launch `clipctl`
 - Copy any text/image—it's automatically captured
 - Navigate with `j`/`k`, search with `/`, paste with `Enter`
+- Press `?` to view the help screen with all keybindings
+
+**Visual Features:**
+- Multiple color themes (Nord, Dracula, Tokyo Night, Gruvbox)
+- Automatic syntax highlighting for code snippets (Rust, Python, JavaScript, Go, C++, Java, SQL, Bash, and more)
+- Rich text rendering with markdown-style formatting
+- Colored icons for different content types (text, URLs, images, documents)
+- Enhanced preview pane with metadata and styled tags
 
 See `docs/Usage.md` for detailed workflows and `docs/Quick_FAQs.md` for command reference.
 
