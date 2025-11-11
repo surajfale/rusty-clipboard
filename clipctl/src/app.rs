@@ -46,6 +46,10 @@ impl App {
             .await
             .context("failed to request initial history")?;
 
+        // Wait for the initial response before starting the UI
+        let initial_response = client.next_message().await?;
+        ui.ingest_response(initial_response)?;
+
         let mut tick = time::interval(Duration::from_millis(75));
         ui.draw()?;
 
@@ -68,6 +72,7 @@ impl App {
                 },
                 response = client.next_message() => {
                     ui.ingest_response(response?)?;
+                    ui.draw()?;  // Immediately redraw after receiving new data
                 }
             }
         }
