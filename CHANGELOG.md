@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### 2025-11-11 13:47:38 - 78cec38 [LOCAL]
+### 2025-11-21 22:33:37 - a6a1622 [LOCAL]
+
+feat(ipc): enhance error messages for pipe connection and creation
+
+- Improved connection error message with troubleshooting steps
+- Added security attributes for named pipe creation
+- Updated dependencies in Cargo.toml for Windows security features### 2025-11-11 13:47:38 - 78cec38 [PUSHED]
 
 feat(docs): add license files and update README with badges
 

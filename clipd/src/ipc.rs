@@ -76,9 +76,18 @@ impl Server {
     }
 
     fn create_pipe(&self) -> Result<NamedPipeServer> {
+        // Create named pipe with default security attributes
+        // This grants access to the same user that created the pipe
         ServerOptions::new()
             .create(&self.inner.pipe_name)
-            .with_context(|| format!("failed to create named pipe {}", self.inner.pipe_name))
+            .with_context(|| {
+                format!(
+                    "failed to create named pipe {}. \
+                    If you're getting 'Access is denied', ensure clipd is running \
+                    and was started by the same user.",
+                    self.inner.pipe_name
+                )
+            })
     }
 }
 

@@ -44,7 +44,15 @@ impl Client {
     pub async fn connect() -> Result<Self> {
         let pipe = ClientOptions::new()
             .open(PIPE_NAME)
-            .with_context(|| format!("failed to connect to pipe {PIPE_NAME}"))?;
+            .with_context(|| {
+                format!(
+                    "failed to connect to pipe {PIPE_NAME}\n\
+                    This usually means:\n\
+                    1. The clipd daemon is not running - start it with: cargo run --bin clipd\n\
+                    2. The daemon was started with different permissions (e.g., as administrator)\n\
+                    3. Check if clipd is running: Get-Process clipd"
+                )
+            })?;
         Ok(Self { pipe })
     }
 
